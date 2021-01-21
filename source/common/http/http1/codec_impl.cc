@@ -129,7 +129,12 @@ void StreamEncoderImpl::encodeHeadersBase(const RequestOrResponseHeaderMap& head
       return HeaderMap::Iterate::Continue;
     }
 
-    encodeFormattedHeader(key_to_use, header.value().getStringView());
+    if (header.preservedKey().empty()) {
+      encodeFormattedHeader(key_to_use, header.value().getStringView());
+    } else {
+      // use preserved case of key to encode formatted header
+      encodeFormattedHeader(header.preservedKey().getStringView(), header.value().getStringView());
+    }
 
     return HeaderMap::Iterate::Continue;
   });
@@ -493,6 +498,9 @@ Status ConnectionImpl::completeLastHeader() {
   ENVOY_CONN_LOG(trace, "completed header: key={} value={}", connection_,
                  current_header_field_.getStringView(), current_header_value_.getStringView());
 
+  // saving the original case-preserved header field here.
+  std::string current_header_field_orig(std::string(current_header_field_.getStringView()));
+
   RETURN_IF_ERROR(checkHeaderNameForUnderscores());
   auto& headers_or_trailers = headersOrTrailers();
   if (!current_header_field_.empty()) {
@@ -501,8 +509,17 @@ Status ConnectionImpl::completeLastHeader() {
     // in ConnectionImpl::onHeaderValue. http_parser does not strip leading or trailing whitespace
     // as the spec requires: https://tools.ietf.org/html/rfc7230#section-3.2.4
     current_header_value_.rtrim();
+
+    // saving the lowercase string of key
+    LowerCaseString key(std::string(current_header_field_.getStringView()));
+
     headers_or_trailers.addViaMove(std::move(current_header_field_),
                                    std::move(current_header_value_));
+
+    if (codec_settings_.header_key_format_ == Http1Settings::HeaderKeyFormat::PreservedCase) {
+      // set the preserved case header string in the header entry for this newly created key-value pair
+      headers_or_trailers.setPreservingCase(key, current_header_field_orig);
+    }
   }
 
   // Check if the number of headers exceeds the limit.

@@ -237,6 +237,10 @@ void HeaderMapImpl::HeaderEntryImpl::value(const HeaderEntry& header) {
   value(header.value().getStringView());
 }
 
+void HeaderMapImpl::HeaderEntryImpl::preservedKey(absl::string_view case_preserved_key) {
+  case_preserved_key_.setCopy(case_preserved_key);
+}
+
 template <> HeaderMapImpl::StaticLookupTable<RequestHeaderMap>::StaticLookupTable() {
 #define REGISTER_DEFAULT_REQUEST_HEADER(name)                                                      \
   CustomInlineHeaderRegistry::registerInlineHeader<RequestHeaderMap::header_map_type>(             \
@@ -458,6 +462,13 @@ void HeaderMapImpl::setCopy(const LowerCaseString& key, absl::string_view value)
   } else {
     remove(key);
     addCopy(key, value);
+  }
+}
+
+void HeaderMapImpl::setPreservingCase(const LowerCaseString& key, absl::string_view case_preserved_key) {
+  auto entry = getExisting(key);
+  if (!entry.empty()) {
+    entry[0]->preservedKey(case_preserved_key);
   }
 }
 

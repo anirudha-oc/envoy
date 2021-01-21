@@ -99,6 +99,9 @@ message Http1ProtocolOptions {
     message ProperCaseWords {
     }
 
+    message PreservedCaseWords {
+    }
+
     oneof header_format {
       option (validate.required) = true;
 
@@ -108,6 +111,9 @@ message Http1ProtocolOptions {
       // Note that while this results in most headers following conventional casing, certain headers
       // are not covered. For example, the "TE" header will be formatted as "Te".
       ProperCaseWords proper_case_words = 1;
+
+      // Preserves the case of the header keys
+      PreservedCaseWords preserved_case_words = 2;
     }
   }
 

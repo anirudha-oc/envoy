@@ -253,6 +253,9 @@ public:
    */
   virtual HeaderString& value() PURE;
 
+  virtual void preservedKey(absl::string_view case_preserved_key) PURE;
+  virtual const HeaderString& preservedKey() const PURE;
+
 private:
   void value(const char*); // Do not allow auto conversion to std::string
 };
@@ -499,6 +502,8 @@ public:
    * TODO(asraa): Investigate whether necessary to set all headers with the key.
    */
   virtual void setCopy(const LowerCaseString& key, absl::string_view value) PURE;
+
+  virtual void setPreservingCase(const LowerCaseString& key, absl::string_view case_preserved_key) PURE;
 
   /**
    * @return uint64_t the size of the header map in bytes. This is the sum of the header keys and
