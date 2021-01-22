@@ -601,6 +601,14 @@ void HeaderMapImpl::dumpState(std::ostream& os, int indent_level) const {
   });
 }
 
+bool HeaderMapImpl::isHeadersCasePreservationEnabled() const {
+  return is_headers_case_preserved;
+}
+
+void HeaderMapImpl::enableHeadersCasePreservation(bool enabled) {
+  is_headers_case_preserved = enabled;
+}
+
 HeaderMapImpl::HeaderEntryImpl& HeaderMapImpl::maybeCreateInline(HeaderEntryImpl** entry,
                                                                  const LowerCaseString& key) {
   if (*entry) {

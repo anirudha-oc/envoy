@@ -97,6 +97,8 @@ public:
   size_t size() const { return headers_.size(); }
   bool empty() const { return headers_.empty(); }
   void dumpState(std::ostream& os, int indent_level = 0) const;
+  bool isHeadersCasePreservationEnabled() const;
+  void enableHeadersCasePreservation(bool enabled);
 
 protected:
   struct HeaderEntryImpl : public HeaderEntry, NonCopyable {
@@ -329,6 +331,8 @@ protected:
   HeaderList headers_;
   // This holds the internal byte size of the HeaderMap.
   uint64_t cached_byte_size_ = 0;
+private:
+  bool is_headers_case_preserved{false};
 };
 
 /**
@@ -394,6 +398,12 @@ public:
   bool empty() const override { return HeaderMapImpl::empty(); }
   void dumpState(std::ostream& os, int indent_level = 0) const override {
     HeaderMapImpl::dumpState(os, indent_level);
+  }
+  bool isHeadersCasePreservationEnabled() const override {
+    return HeaderMapImpl::isHeadersCasePreservationEnabled();
+  }
+  void enableHeadersCasePreservation(bool enabled) override {
+    HeaderMapImpl::enableHeadersCasePreservation(enabled);
   }
 
   // Generic custom header functions for each fully typed interface. To avoid accidental issues,

@@ -38,6 +38,9 @@ int HeaderMapWrapper::luaAdd(lua_State* state) {
   const char* key = luaL_checkstring(state, 2);
   const char* value = luaL_checkstring(state, 3);
   headers_.addCopy(Http::LowerCaseString(key), value);
+  if (headers_.isHeadersCasePreservationEnabled()) {
+    headers_.setPreservingCase(Http::LowerCaseString(key), std::string(key));
+  }
   return 0;
 }
 

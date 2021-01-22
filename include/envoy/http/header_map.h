@@ -606,6 +606,10 @@ public:
    */
   virtual void dumpState(std::ostream& os, int indent_level = 0) const PURE;
 
+  virtual bool isHeadersCasePreservationEnabled() const PURE;
+
+  virtual void enableHeadersCasePreservation(bool enabled) PURE;
+
   /**
    * Allow easy pretty-printing of the key/value pairs in HeaderMap
    * @param os supplies the ostream to print to.

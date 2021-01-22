@@ -519,6 +519,12 @@ Status ConnectionImpl::completeLastHeader() {
     if (codec_settings_.header_key_format_ == Http1Settings::HeaderKeyFormat::PreservedCase) {
       // set the preserved case header string in the header entry for this newly created key-value pair
       headers_or_trailers.setPreservingCase(key, current_header_field_orig);
+
+      // enabling HeadersCasePreservation in header map. This is mainly set so that
+      // isHeadersCasePreservationEnabled() can be used to check if HeadersCasePreservation
+      // is enabled or not. This is mainly for filters where httpsettings
+      // (codec_settings_.header_key_format_) is not directly accessible.
+      headers_or_trailers.enableHeadersCasePreservation(true);
     }
   }
 
