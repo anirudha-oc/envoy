@@ -133,7 +133,8 @@ void StreamEncoderImpl::encodeHeadersBase(const RequestOrResponseHeaderMap& head
       encodeFormattedHeader(key_to_use, header.value().getStringView());
     } else {
       // use preserved case of key to encode formatted header
-      encodeFormattedHeader(header.preservedKey().getStringView(), header.value().getStringView());
+      encodeFormattedHeader(header.preservedKey().getStringView(),
+                            header.value().getStringView());
     }
 
     return HeaderMap::Iterate::Continue;
@@ -517,6 +518,8 @@ Status ConnectionImpl::completeLastHeader() {
                                    std::move(current_header_value_));
 
     if (codec_settings_.header_key_format_ == Http1Settings::HeaderKeyFormat::PreservedCase) {
+      ENVOY_CONN_LOG(trace, "Header field-name case-preservation is enabled: preserved key={}",
+                     connection_, current_header_field_orig);
       // set the preserved case header string in the header entry for this newly created key-value pair
       headers_or_trailers.setPreservingCase(key, current_header_field_orig);
 

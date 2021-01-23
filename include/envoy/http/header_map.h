@@ -253,7 +253,14 @@ public:
    */
   virtual HeaderString& value() PURE;
 
+  /**
+   * Set the header's case-preserved key by copying the string into it.
+   */
   virtual void preservedKey(absl::string_view case_preserved_key) PURE;
+
+  /**
+   * @return the header's case-preserved key.
+   */
   virtual const HeaderString& preservedKey() const PURE;
 
 private:
@@ -503,6 +510,15 @@ public:
    */
   virtual void setCopy(const LowerCaseString& key, absl::string_view value) PURE;
 
+  /**
+   * Saves the original casing of header key in the map alongside its lower-case form.
+   * The key MUST point to point to data that will live beyond the lifetime of any
+   * request/response using the string (since a codec may optimize for zero copy).
+   * The case_preserved_key will be copied.
+   *
+   * @param key specifies the name of the header to set; it WILL NOT be copied.
+   * @param case_preserved_key specifies the key in original case; it WILL be copied.
+   */
   virtual void setPreservingCase(const LowerCaseString& key, absl::string_view case_preserved_key) PURE;
 
   /**
@@ -606,8 +622,14 @@ public:
    */
   virtual void dumpState(std::ostream& os, int indent_level = 0) const PURE;
 
+  /**
+   * @return true if header field-name case-preservation is enabled in map, false otherwise.
+   */
   virtual bool isHeadersCasePreservationEnabled() const PURE;
 
+  /**
+   * Enables / Disables the header field-name case-preservation in the map.
+   */
   virtual void enableHeadersCasePreservation(bool enabled) PURE;
 
   /**
