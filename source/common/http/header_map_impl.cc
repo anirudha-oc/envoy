@@ -426,6 +426,9 @@ void HeaderMapImpl::addCopy(const LowerCaseString& key, absl::string_view value)
   insertByKey(std::move(new_key), std::move(new_value));
   ASSERT(new_key.empty());   // NOLINT(bugprone-use-after-move)
   ASSERT(new_value.empty()); // NOLINT(bugprone-use-after-move)
+  if (isHeadersCasePreservationEnabled()) {
+    preserveCase(key);
+  }
 }
 
 void HeaderMapImpl::appendCopy(const LowerCaseString& key, absl::string_view value) {
@@ -465,10 +468,10 @@ void HeaderMapImpl::setCopy(const LowerCaseString& key, absl::string_view value)
   }
 }
 
-void HeaderMapImpl::setPreservingCase(const LowerCaseString& key, absl::string_view case_preserved_key) {
+void HeaderMapImpl::preserveCase(const LowerCaseString& key) {
   auto entry = getExisting(key);
   if (!entry.empty()) {
-    entry[0]->preservedKey(case_preserved_key);
+    entry[0]->preservedKey(key.getOriginal());
   }
 }
 

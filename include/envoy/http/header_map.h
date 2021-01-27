@@ -47,16 +47,22 @@ static inline bool validHeaderString(absl::string_view s) {
  */
 class LowerCaseString {
 public:
-  LowerCaseString(LowerCaseString&& rhs) noexcept : string_(std::move(rhs.string_)) {
+  LowerCaseString(LowerCaseString&& rhs) noexcept
+      : string_(std::move(rhs.string_)), original_string_(std::move(rhs.original_string_)) {
     ASSERT(valid());
   }
-  LowerCaseString(const LowerCaseString& rhs) : string_(rhs.string_) { ASSERT(valid()); }
-  explicit LowerCaseString(const std::string& new_string) : string_(new_string) {
+  LowerCaseString(const LowerCaseString& rhs)
+      : string_(rhs.string_), original_string_(rhs.original_string_) {
+    ASSERT(valid());
+  }
+  explicit LowerCaseString(const std::string& new_string)
+      : string_(new_string), original_string_(new_string) {
     ASSERT(valid());
     lower();
   }
 
   const std::string& get() const { return string_; }
+  const std::string& getOriginal() const { return original_string_; }
   bool operator==(const LowerCaseString& rhs) const { return string_ == rhs.string_; }
   bool operator!=(const LowerCaseString& rhs) const { return string_ != rhs.string_; }
   bool operator<(const LowerCaseString& rhs) const { return string_.compare(rhs.string_) < 0; }
@@ -65,9 +71,10 @@ private:
   void lower() {
     std::transform(string_.begin(), string_.end(), string_.begin(), absl::ascii_tolower);
   }
-  bool valid() const { return validHeaderString(string_); }
+  bool valid() const { return validHeaderString(string_) && validHeaderString(original_string_); }
 
   std::string string_;
+  std::string original_string_;
 };
 
 /**
@@ -514,12 +521,10 @@ public:
    * Saves the original casing of header key in the map alongside its lower-case form.
    * The key MUST point to point to data that will live beyond the lifetime of any
    * request/response using the string (since a codec may optimize for zero copy).
-   * The case_preserved_key will be copied.
    *
-   * @param key specifies the name of the header to set; it WILL NOT be copied.
-   * @param case_preserved_key specifies the key in original case; it WILL be copied.
+   * @param key specifies the name of the header to set
    */
-  virtual void setPreservingCase(const LowerCaseString& key, absl::string_view case_preserved_key) PURE;
+  virtual void preserveCase(const LowerCaseString& key) PURE;
 
   /**
    * @return uint64_t the size of the header map in bytes. This is the sum of the header keys and

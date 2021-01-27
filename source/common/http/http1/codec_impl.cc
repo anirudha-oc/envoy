@@ -511,23 +511,20 @@ Status ConnectionImpl::completeLastHeader() {
     // as the spec requires: https://tools.ietf.org/html/rfc7230#section-3.2.4
     current_header_value_.rtrim();
 
-    // saving the lowercase string of key
-    LowerCaseString key(std::string(current_header_field_.getStringView()));
-
     headers_or_trailers.addViaMove(std::move(current_header_field_),
                                    std::move(current_header_value_));
 
     if (codec_settings_.header_key_format_ == Http1Settings::HeaderKeyFormat::PreservedCase) {
       ENVOY_CONN_LOG(trace, "Header field-name case-preservation is enabled: preserved key={}",
                      connection_, current_header_field_orig);
-      // set the preserved case header string in the header entry for this newly created key-value pair
-      headers_or_trailers.setPreservingCase(key, current_header_field_orig);
-
       // enabling HeadersCasePreservation in header map. This is mainly set so that
       // isHeadersCasePreservationEnabled() can be used to check if HeadersCasePreservation
-      // is enabled or not. This is mainly for filters where httpsettings
+      // is enabled or not. This is mainly for the places where httpsettings
       // (codec_settings_.header_key_format_) is not directly accessible.
       headers_or_trailers.enableHeadersCasePreservation(true);
+
+      // set the preserved case header string in the header entry for the newly created key-value pair
+      headers_or_trailers.preserveCase(LowerCaseString(current_header_field_orig));
     }
   }
 

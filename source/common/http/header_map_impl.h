@@ -85,7 +85,7 @@ public:
   void setReference(const LowerCaseString& key, absl::string_view value);
   void setReferenceKey(const LowerCaseString& key, absl::string_view value);
   void setCopy(const LowerCaseString& key, absl::string_view value);
-  void setPreservingCase(const LowerCaseString& key, absl::string_view case_preserved_key);
+  void preserveCase(const LowerCaseString& key);
   uint64_t byteSize() const;
   HeaderMap::GetResult get(const LowerCaseString& key) const;
   void iterate(HeaderMap::ConstIterateCb cb) const;
@@ -375,8 +375,8 @@ public:
   void setCopy(const LowerCaseString& key, absl::string_view value) override {
     HeaderMapImpl::setCopy(key, value);
   }
-  void setPreservingCase(const LowerCaseString& key, absl::string_view case_preserved_key) override {
-    HeaderMapImpl::setPreservingCase(key, case_preserved_key);
+  void preserveCase(const LowerCaseString& key) override {
+    HeaderMapImpl::preserveCase(key);
   }
   uint64_t byteSize() const override { return HeaderMapImpl::byteSize(); }
   HeaderMap::GetResult get(const LowerCaseString& key) const override {
