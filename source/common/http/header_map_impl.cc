@@ -237,6 +237,10 @@ void HeaderMapImpl::HeaderEntryImpl::value(const HeaderEntry& header) {
   value(header.value().getStringView());
 }
 
+void HeaderMapImpl::HeaderEntryImpl::preservedKey(absl::string_view case_preserved_key) {
+  case_preserved_key_.setCopy(case_preserved_key);
+}
+
 template <> HeaderMapImpl::StaticLookupTable<RequestHeaderMap>::StaticLookupTable() {
 #define REGISTER_DEFAULT_REQUEST_HEADER(name)                                                      \
   CustomInlineHeaderRegistry::registerInlineHeader<RequestHeaderMap::header_map_type>(             \
@@ -422,6 +426,9 @@ void HeaderMapImpl::addCopy(const LowerCaseString& key, absl::string_view value)
   insertByKey(std::move(new_key), std::move(new_value));
   ASSERT(new_key.empty());   // NOLINT(bugprone-use-after-move)
   ASSERT(new_value.empty()); // NOLINT(bugprone-use-after-move)
+  if (isHeadersCasePreservationEnabled()) {
+    preserveCase(key);
+  }
 }
 
 void HeaderMapImpl::appendCopy(const LowerCaseString& key, absl::string_view value) {
@@ -458,6 +465,13 @@ void HeaderMapImpl::setCopy(const LowerCaseString& key, absl::string_view value)
   } else {
     remove(key);
     addCopy(key, value);
+  }
+}
+
+void HeaderMapImpl::preserveCase(const LowerCaseString& key) {
+  auto entry = getExisting(key);
+  if (!entry.empty()) {
+    entry[0]->preservedKey(key.getOriginal());
   }
 }
 
@@ -588,6 +602,14 @@ void HeaderMapImpl::dumpState(std::ostream& os, int indent_level) const {
        << "'\n";
     return HeaderMap::Iterate::Continue;
   });
+}
+
+bool HeaderMapImpl::isHeadersCasePreservationEnabled() const {
+  return is_headers_case_preserved;
+}
+
+void HeaderMapImpl::enableHeadersCasePreservation(bool enabled) {
+  is_headers_case_preserved = enabled;
 }
 
 HeaderMapImpl::HeaderEntryImpl& HeaderMapImpl::maybeCreateInline(HeaderEntryImpl** entry,

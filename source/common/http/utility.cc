@@ -478,6 +478,8 @@ Utility::parseHttp1Settings(const envoy::config::core::v3::Http1ProtocolOptions&
 
   if (config.header_key_format().has_proper_case_words()) {
     ret.header_key_format_ = Http1Settings::HeaderKeyFormat::ProperCase;
+  } else if (config.header_key_format().has_preserved_case_words()) {
+    ret.header_key_format_ = Http1Settings::HeaderKeyFormat::PreservedCase;
   } else {
     ret.header_key_format_ = Http1Settings::HeaderKeyFormat::Default;
   }

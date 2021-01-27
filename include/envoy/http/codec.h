@@ -396,6 +396,8 @@ struct Http1Settings {
     // Performs proper casing of header keys: the first and all alpha characters following a
     // non-alphanumeric character is capitalized.
     ProperCase,
+    // Preserve the casing of header key without any added formatting
+    PreservedCase,
   };
 
   // How header keys should be formatted when serializing HTTP/1.1 headers.
